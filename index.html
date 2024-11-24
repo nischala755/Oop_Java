@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zenpay - Login</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        button:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .switch-form {
+            text-align: center;
+            color: #4a5568;
+        }
+
+        .switch-form span {
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-form">
+            <h2>Welcome Back</h2>
+            <div class="message"></div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <i>📧</i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <i>🔒</i>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <p class="switch-form">
+                Don't have an account? <span id="goToRegister">Register here</span>
+            </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="hidden">
+            <h2>Create Account</h2>
+            <div class="message"></div>
+            <form id="registerForm">
+                <div class="input-group">
+                    <input type="email" id="registerEmail" placeholder="Email" required>
+                    <i>📧</i>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="registerPassword" placeholder="Password" required 
+                           pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}"
+                           title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 characters">
+                    <i>🔒</i>
+                    <div class="password-requirements">
+                        Password must contain at least 8 characters, including uppercase, lowercase, number, and special character
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    <i>🔒</i>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <p class="switch-form">
+                Already have an account? <span id="goToLogin">Login here</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const loading = document.querySelector('.loading');
+
+        // Helper function to show loading
+        function showLoading() {
+            loading.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+
+        // Helper function to show messages
+        function showMessage(formId, text, type) {
+            const messageDiv = document.querySelector(`#${formId} .message`);
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Helper function to hash password
+        function hashPassword(password) {
+            return CryptoJS.SHA256(password).toString();
+        }
+
+        // Switch between forms
+        document.getElementById('goToRegister').addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+
+        document.getElementById('goToLogin').addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+
+        // Password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = this.value;
+            const registerButton = document.querySelector('#registerForm button');
+            
+            if (password !== confirmPassword) {
+                confirmPassword.setCustomValidity("Passwords don't match");
+                registerButton.disabled = true;
+            } else {
+                confirmPassword.setCustomValidity("");
+                registerButton.disabled = false;
+            }
+        });
+
+        // Handle Registration
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const hashedPassword = hashPassword(password);
+
+            try {
+                // Registration API call or logic
+                setTimeout(() => {
+                    hideLoading();
+                    showMessage('register-form', 'Registration successful!', 'success');
+                    registerForm.reset();
+                    loginForm.classList.remove('hidden');
+                    registerForm.classList.add('hidden');
+                    window.location.href = 'dashboard.html';  // Redirect to the dashboard
+                }, 2000);
+            } catch (error) {
+                hideLoading();
+                showMessage('register-form', 'Registration failed. Please try again.', 'error');
+            }
+        });
+
+        // Handle Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const hashedPassword = hashPassword(password);
+
+            try {
+                // Login API call or logic
+                setTimeout(() => {
+                    hideLoading();
+                    showMessage('login-form', 'Login successful!', 'success');
+                    window.location.href = 'dashboard.html';  // Redirect to the dashboard
+                }, 2000);
+            } catch (error) {
+                hideLoading();
+                showMessage('login-form', 'Login failed. Please try again.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

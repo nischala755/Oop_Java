@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Payments</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --success: #22c55e;
+            --error: #ef4444;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #payments {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--text-primary);
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: -0.025em;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: white;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #walletStatus, #transactionStatus {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .input-group {
+            margin: 1.5rem 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background-color: var(--background);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .success {
+            color: var(--success);
+            padding: 0.5rem;
+            border-radius: 6px;
+            background-color: rgba(34, 197, 94, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .failure {
+            color: var(--error);
+            padding: 0.5rem;
+            border-radius: 6px;
+            background-color: rgba(239, 68, 68, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        @media (max-width: 640px) {
+            #payments {
+                padding: 1.5rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="payments">
+        <h2>Crypto Payments</h2>
+
+        <button id="metamaskLogin">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+            </svg>
+            Connect Wallet
+        </button>
+
+        <div id="walletStatus"></div>
+
+        <div class="input-group" id="amountInput" style="display: none;">
+            <label for="amount">Payment Amount (ETH)</label>
+            <input 
+                type="number" 
+                id="amount" 
+                placeholder="0.01" 
+                step="0.001" 
+                min="0.001"
+                autocomplete="off"
+            >
+        </div>
+
+        <div id="transactionStatus"></div>
+
+        <button id="sendPayment" style="display:none;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m22 2-7 20-4-9-9-4Z"/>
+                <path d="M22 2 11 13"/>
+            </svg>
+            Send Payment
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <script>
+        // Sample status update function to demonstrate UI
+        function updateStatus(element, message, type) {
+            const icons = {
+                success: ` 
+                    <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                `,
+                error: `
+                    <svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                `,
+                loading: `
+                    <svg class="status-icon loading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="6" x2="12" y2="12"/>
+                    </svg>
+                `
+            };
+            
+            element.innerHTML = `${icons[type] || ''} ${message}`;
+            element.className = type;
+        }
+
+        // Mock hash generation for transaction
+        function generateMockHash() {
+            return '0x' + Math.random().toString(36).substr(2, 9); // Generates a mock hash
+        }
+
+        // Your existing Web3 and MetaMask integration code would go here
+        document.getElementById('metamaskLogin').addEventListener('click', async () => {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    updateStatus(document.getElementById('walletStatus'), 'Connecting...', 'loading');
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const account = accounts[0];
+                    updateStatus(document.getElementById('walletStatus'), `Connected: ${account}`, 'success');
+                    
+                    document.getElementById('amountInput').style.display = 'block';
+                    document.getElementById('sendPayment').style.display = 'inline-block';
+                } catch (error) {
+                    updateStatus(document.getElementById('walletStatus'), 'Error connecting to MetaMask', 'error');
+                }
+            } else {
+                updateStatus(document.getElementById('walletStatus'), 'MetaMask not detected', 'error');
+            }
+        });
+
+        document.getElementById('sendPayment').addEventListener('click', () => {
+            const amount = document.getElementById('amount').value;
+            if (amount > 0) {
+                // Simulate sending the transaction
+                updateStatus(document.getElementById('transactionStatus'), 'Processing Payment...', 'loading');
+                
+                setTimeout(() => {
+                    const transactionHash = generateMockHash();  // Mock hash generation
+                    updateStatus(document.getElementById('transactionStatus'), `Payment Successful! Transaction Hash: ${transactionHash}`, 'success');
+                }, 2000);  // Mock processing delay
+            } else {
+                updateStatus(document.getElementById('transactionStatus'), 'Please enter a valid amount', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
