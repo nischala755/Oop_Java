@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const sharedExpensesList = document.getElementById('sharedExpensesList');
     const sharedUsersList = document.getElementById('sharedUsersList');
 
+    // Allowed phone numbers and UPI IDs
+    const ALLOWED_PHONE_NUMBERS = [
+        '+91 9591035732', 
+        '+91 83093 59973', 
+        '+91 83093 55762'
+    ];
+
+    const ALLOWED_UPI_IDS = [
+        'nischi755-1@oksbi', 
+        'annie-1@okcan', 
+        'vaishnavi-1@okcan'
+    ];
+
     // Get stored data from localStorage
     let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
     let sharedUsers = JSON.parse(localStorage.getItem('sharedUsers')) || [];
@@ -99,9 +112,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Phone number validation (simple 10-digit check)
-        if (!/^\d{10}$/.test(phone)) {
-            alert('Please enter a valid 10-digit phone number.');
+        // Specific phone number validation
+        if (!ALLOWED_PHONE_NUMBERS.includes(phone)) {
+            alert('This phone number is not allowed. Please use an approved number.');
+            return;
+        }
+
+        // Specific UPI ID validation
+        if (!ALLOWED_UPI_IDS.includes(upiId)) {
+            alert('This UPI ID is not allowed. Please use an approved UPI ID.');
             return;
         }
 
